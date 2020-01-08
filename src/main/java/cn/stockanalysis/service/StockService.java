@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -63,9 +64,6 @@ public class StockService {
 	
 	@Autowired
 	private DailyTradeRepository dtRep;
-	
-	// 下载CSV数据用线程池
-	private final static ExecutorService dles = Executors.newSingleThreadExecutor();
 
 	// csv数据写入DB线程池
 	private final static ExecutorService ies = Executors.newFixedThreadPool(4);
@@ -176,15 +174,16 @@ public class StockService {
 	 * 异步下载所有上市公司交易数据
 	 */
 	public String asynDownLoadTradeCsv(String startDate, String endDate) {
-		dles.submit(new Callable<Integer>() {
+		FutureTask<Integer> downLoadTask = new FutureTask<>(new Callable<Integer>() {
 			@Override
 			public Integer call() {
 				return downloadTradeCsv(startDate, endDate);
 			}
 		});
+		new Thread(downLoadTask).start();
 		return "request success";
 	}
-	
+
 	/**
 	 * 下载所有上市公司交易数据
 	 * @return
