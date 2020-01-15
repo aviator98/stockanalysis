@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import org.apache.http.HttpEntity;
@@ -51,7 +50,7 @@ public class StockService {
 	private static Logger logger = LoggerFactory.getLogger(StockService.class);
 	
 	@Autowired
-    private CompanyRepository comRep;
+	private CompanyRepository comRep;
 	
 	@Autowired
 	private TradeRecordRepository trRep;
@@ -91,7 +90,7 @@ public class StockService {
 	}
 
 	private int grabCompanys(String url) {
-    	WebClient wc = new WebClient(BrowserVersion.CHROME);
+		WebClient wc = new WebClient(BrowserVersion.CHROME);
 		try {
 			// 启用JS解释器，默认为true
 			wc.getOptions().setJavaScriptEnabled(true);
@@ -241,44 +240,44 @@ public class StockService {
 		try {
 			HttpGet httpGet = new HttpGet(sb.toString());
 			HttpResponse respone = client.execute(httpGet);
-		    if(respone.getStatusLine().getStatusCode() != HttpStatus.SC_OK){
-		    	return 0;
-		    }
-		    HttpEntity entity = respone.getEntity();
-		    if(entity != null) {
-		        InputStream is = entity.getContent();
-		        String foldName = "";
-		        if (startDate.equals(endDate)) {
-		        	foldName = startDate;
-		        } else {
-		        	foldName = startDate+"_"+endDate;
-		        }
-		        String csvBasePath = PropertiesUtil.getEnvElement("csv.base.path");
-		        File file = new File(csvBasePath+foldName+"\\"+companyCode+".csv");
-		        if(!file.getParentFile().exists()) {
-		        	file.getParentFile().mkdir();
-		        }
-		        FileOutputStream fos = new FileOutputStream(file); 
-		        byte[] buffer = new byte[4096];
-		        int len = -1;
-		        while((len = is.read(buffer) )!= -1){
-		            fos.write(buffer, 0, len);
-		        }
-		        fos.close();
-		        is.close();
-		    }
+			if(respone.getStatusLine().getStatusCode() != HttpStatus.SC_OK){
+				return 0;
+			}
+			HttpEntity entity = respone.getEntity();
+			if(entity != null) {
+				InputStream is = entity.getContent();
+				String foldName = "";
+				if (startDate.equals(endDate)) {
+					foldName = startDate;
+				} else {
+					foldName = startDate+"_"+endDate;
+				}
+				String csvBasePath = PropertiesUtil.getEnvElement("csv.base.path");
+				File file = new File(csvBasePath+foldName+"\\"+companyCode+".csv");
+				if(!file.getParentFile().exists()) {
+					file.getParentFile().mkdir();
+				}
+				FileOutputStream fos = new FileOutputStream(file); 
+				byte[] buffer = new byte[4096];
+				int len = -1;
+				while((len = is.read(buffer) )!= -1){
+					fos.write(buffer, 0, len);
+				}
+				fos.close();
+				is.close();
+			}
 		} catch (Exception e) {
 			logger.error("companyCode->" + companyCode + "#" + e.toString());
 			return 0;
 		} finally {
-		    try {
-		        client.close();
-		    } catch (IOException e) {
-		        logger.error("companyCode->" + companyCode + "#" + e.toString());
-		    }
+			try {
+				client.close();
+			} catch (IOException e) {
+				logger.error("companyCode->" + companyCode + "#" + e.toString());
+			}
 		}
 		return 1;
-    }
+	}
 
 	/**
 	 * 导入所有公司交易数据至DB中
